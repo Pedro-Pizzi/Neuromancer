@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#111111">
+    <meta name="description" content="Guia de leitura sem spoilers para Neuromancer.">
+    <title>Neuromancer — guia de leitura</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: oklch(0.08 0 0);
+        --surface: oklch(0.14 0.008 210);
+        --surface-raised: oklch(0.18 0.01 210);
+        --surface-soft: oklch(0.12 0.006 210);
+        --ink: oklch(0.94 0 0);
+        --ink-dim: oklch(0.75 0.024 245);
+        --ink-faint: oklch(0.58 0.02 245);
+        --line: oklch(0.3 0.014 210);
+        --green: oklch(0.62 0.154 130);
+        --green-deep: oklch(0.34 0.09 130);
+        --teal: oklch(0.64 0.105 205);
+        --teal-deep: oklch(0.28 0.06 205);
+        --warning: oklch(0.73 0.13 78);
+        --danger: oklch(0.64 0.18 28);
+        --space-2xs: 0.25rem;
+        --space-xs: 0.5rem;
+        --space-sm: 0.75rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        --space-2xl: 3rem;
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --font-ui: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { min-height: 100%; background: var(--bg); }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        background: var(--bg);
+        font-family: var(--font-ui);
+        font-kerning: normal;
+        font-optical-sizing: auto;
+        font-size: 1rem;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        line-height: 1.6;
+      }
+
+      body::before {
+        position: fixed;
+        z-index: -2;
+        inset: 0;
+        content: "";
+        background-image: url("assets/rainy-rail-background.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        opacity: 0.24;
+        pointer-events: none;
+      }
+
+      body::after {
+        position: fixed;
+        z-index: -1;
+        inset: 0;
+        content: "";
+        background: oklch(0.08 0 0 / 0.74);
+        pointer-events: none;
+      }
+
+      button, input, textarea { font: inherit; }
+      button { color: inherit; }
+      button, [role="button"] { -webkit-tap-highlight-color: transparent; }
+      button:not(:disabled), summary { cursor: pointer; }
+      button:disabled { cursor: not-allowed; }
+
+      :focus-visible {
+        outline: 0.1875rem solid var(--teal);
+        outline-offset: 0.1875rem;
+      }
+
+      .skip-link {
+        position: fixed;
+        z-index: 20;
+        top: var(--space-sm);
+        left: var(--space-sm);
+        padding: var(--space-sm) var(--space-md);
+        color: var(--bg);
+        background: var(--ink);
+        transform: translateY(-180%);
+        transition: transform 160ms var(--ease-out);
+      }
+
+      .skip-link:focus { transform: translateY(0); }
+
+      .app-shell {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, 1fr);
+        width: min(100%, 100rem);
+        min-height: 100vh;
+        margin-inline: auto;
+        background: oklch(0.08 0 0 / 0.82);
+        border-inline: 1px solid oklch(0.34 0.012 210 / 0.65);
+      }
+
+      .sidebar {
+        display: flex;
+        position: sticky;
+        top: 0;
+        flex-direction: column;
+        min-height: 100vh;
+        padding: var(--space-xl) var(--space-md) var(--space-lg);
+        background: oklch(0.1 0.005 210 / 0.86);
+        border-right: 1px solid var(--line);
+      }
+
+      .brand {
+        display: grid;
+        gap: var(--space-2xs);
+        padding: var(--space-sm) var(--space-sm) var(--space-xl);
+        text-decoration: none;
+      }
+
+      .brand__name {
+        color: var(--ink);
+        font-size: 1.25rem;
+        font-weight: 760;
+        letter-spacing: -0.025em;
+        line-height: 1.1;
+      }
+
+      .brand__subtitle,
+      .eyebrow,
+      .nav__meta {
+        color: var(--ink-faint);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .brand__subtitle { color: var(--green); }
+
+      .nav-list {
+        display: grid;
+        gap: var(--space-2xs);
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+
+      .nav-button {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        width: 100%;
+        min-height: 2.875rem;
+        padding: var(--space-sm);
+        color: var(--ink-dim);
+        text-align: left;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        transition: color 180ms var(--ease-out), background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+      }
+
+      .nav-button:hover { color: var(--ink); background: oklch(0.2 0.012 210 / 0.62); }
+      .nav-button[aria-current="page"] { color: var(--ink); background: var(--surface-raised); border-color: var(--green-deep); }
+      .nav-button[aria-current="page"] .icon { color: var(--green); }
+
+      .icon { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; color: var(--ink-dim); }
+
+      .sidebar__footer {
+        display: grid;
+        gap: var(--space-sm);
+        margin-top: auto;
+        padding: var(--space-lg) var(--space-sm) var(--space-sm);
+        border-top: 1px solid var(--line);
+      }
+
+      .protection-state { display: flex; align-items: center; gap: var(--space-xs); color: var(--ink-dim); font-size: 0.875rem; }
+      .state-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--green); }
+      .state-dot--teal { background: var(--teal); }
+      .sidebar__footer p { max-width: 19ch; margin: 0; color: var(--ink-faint); font-size: 0.8125rem; line-height: 1.5; }
+
+      .workspace { min-width: 0; }
+
+      .topbar {
+        display: flex;
+        position: sticky;
+        z-index: 5;
+        top: 0;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-md);
+        min-height: 4.5rem;
+        padding: var(--space-md) clamp(1rem, 4vw, 3rem);
+        background: oklch(0.08 0 0 / 0.92);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(0.625rem);
+      }
+
+      .topbar__context { min-width: 0; }
+      .topbar__context p { margin: 0; color: var(--ink-faint); font-size: 0.8125rem; }
+      .topbar__context h1 { margin: 0; font-size: 1rem; font-weight: 650; letter-spacing: -0.01em; }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-height: 2.5rem;
+        padding: 0.5rem 0.75rem;
+        color: var(--ink);
+        font-size: 0.8125rem;
+        font-weight: 650;
+        background: var(--surface);
+        border: 1px solid var(--green-deep);
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .main {
+        width: min(100%, 75rem);
+        padding: clamp(1.5rem, 4vw, 3rem);
+        margin-inline: auto;
+      }
+
+      .view-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: var(--space-lg);
+        padding-bottom: var(--space-lg);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .view-header h2,
+      .section-title,
+      .dialog__title {
+        margin: 0;
+        color: var(--ink);
+        font-size: 1.75rem;
+        font-weight: 730;
+        letter-spacing: -0.035em;
+        line-height: 1.12;
+        text-wrap: balance;
+      }
+
+      .view-header p { max-width: 54ch; margin: var(--space-xs) 0 0; color: var(--ink-dim); }
+
+      .section { margin-top: var(--space-2xl); }
+      .section__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); margin-bottom: var(--space-md); }
+      .section-title { font-size: 1.25rem; letter-spacing: -0.02em; }
+      .section__hint { margin: 0; color: var(--ink-faint); font-size: 0.875rem; }
+
+      .progress-panel {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-xl);
+        align-items: center;
+        padding: var(--space-xl);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+      }
+
+      .progress-panel__body { display: grid; gap: var(--space-sm); }
+      .progress-panel__body h3 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+      .progress-panel__body p { max-width: 54ch; margin: 0; color: var(--ink-dim); }
+      .progress-panel__chapter { color: var(--green); font-size: 0.875rem; font-weight: 700; letter-spacing: 0.04em; }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-xs);
+        min-height: 2.75rem;
+        padding: 0.625rem 0.875rem;
+        color: var(--ink);
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+        background: var(--surface-raised);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), color 180ms var(--ease-out), transform 120ms var(--ease-out);
+      }
+
+      .button:hover { background: oklch(0.24 0.012 210); border-color: var(--ink-faint); }
+      .button:active { transform: translateY(0.0625rem); }
+      .button--primary { color: oklch(0.97 0 0); background: var(--green-deep); border-color: var(--green); }
+      .button--primary:hover { background: oklch(0.4 0.105 130); border-color: oklch(0.72 0.14 130); }
+      .button--quiet { color: var(--ink-dim); background: transparent; }
+      .button--danger:hover { color: oklch(0.93 0.03 25); border-color: var(--danger); }
+
+      .quiet-divider { height: 1px; margin: var(--space-xl) 0; background: var(--line); }
+
+      .split-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(15rem, 0.85fr); gap: var(--space-xl); align-items: start; }
+
+      .reading-note,
+      .protection-panel,
+      .empty-state,
+      .notes-panel,
+      .map-panel {
+        padding: var(--space-xl);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+      }
+
+      .reading-note { display: grid; gap: var(--space-md); }
+      .reading-note__lead { margin: 0; color: var(--ink); font-size: 1.125rem; font-weight: 550; line-height: 1.5; }
+      .reading-note__copy { max-width: 58ch; margin: 0; color: var(--ink-dim); }
+
+      .protection-panel { display: grid; gap: var(--space-lg); }
+      .protection-panel h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+      .protection-panel p { margin: 0; color: var(--ink-dim); font-size: 0.9375rem; }
+      .protection-lock { display: flex; align-items: center; gap: var(--space-sm); color: var(--green); font-weight: 700; }
+      .protection-lock .icon { width: 1.5rem; height: 1.5rem; color: var(--green); }
+
+      .list { padding: 0; margin: 0; list-style: none; }
+      .list-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-md); align-items: start; padding: var(--space-lg) 0; border-bottom: 1px solid var(--line); }
+      .list-item:first-child { padding-top: 0; }
+      .list-item:last-child { padding-bottom: 0; border-bottom: 0; }
+      .list-item__glyph { display: grid; width: 2.25rem; height: 2.25rem; place-items: center; color: var(--green); background: oklch(0.18 0.03 130); border: 1px solid var(--green-deep); border-radius: var(--radius-sm); }
+      .list-item__glyph .icon { color: currentColor; }
+      .list-item__body { min-width: 0; }
+      .list-item__title { margin: 0; font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
+      .list-item__description { max-width: 64ch; margin: var(--space-2xs) 0 0; color: var(--ink-dim); font-size: 0.9375rem; }
+      .list-item__meta { padding-top: 0.2rem; color: var(--ink-faint); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+
+      .search-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-sm); align-items: end; margin-top: var(--space-xl); }
+      .field { display: grid; gap: var(--space-xs); }
+      .field label { color: var(--ink-dim); font-size: 0.875rem; font-weight: 650; }
+      .input, .textarea, .number-input {
+        width: 100%;
+        min-height: 2.875rem;
+        padding: 0.625rem 0.75rem;
+        color: var(--ink);
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+      }
+      .input::placeholder, .textarea::placeholder { color: var(--ink-faint); opacity: 1; }
+      .input:focus, .textarea:focus, .number-input:focus { border-color: var(--teal); outline: 0.1875rem solid oklch(0.64 0.105 205 / 0.3); outline-offset: 0; }
+      .textarea { min-height: 12rem; resize: vertical; line-height: 1.6; }
+
+      .empty-state { display: grid; gap: var(--space-sm); place-items: start; min-height: 13rem; align-content: center; }
+      .empty-state .icon { width: 2rem; height: 2rem; color: var(--teal); }
+      .empty-state h3 { margin: 0; font-size: 1.125rem; }
+      .empty-state p { max-width: 50ch; margin: 0; color: var(--ink-dim); }
+
+      .timeline { display: grid; gap: 0; padding: 0; margin: 0; list-style: none; }
+      .timeline__item { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: var(--space-md); padding: var(--space-lg) 0; border-bottom: 1px solid var(--line); }
+      .timeline__item:first-child { padding-top: 0; }
+      .timeline__item:last-child { border-bottom: 0; }
+      .timeline__marker { display: grid; width: 2rem; height: 2rem; place-items: center; color: var(--green); font-size: 0.8125rem; font-weight: 750; background: oklch(0.18 0.03 130); border: 1px solid var(--green-deep); border-radius: 50%; }
+      .timeline__item h3 { margin: 0; font-size: 1rem; }
+      .timeline__item p { max-width: 62ch; margin: var(--space-2xs) 0 0; color: var(--ink-dim); }
+
+      .map-panel { display: grid; gap: var(--space-xl); }
+      .map-panel__header { display: flex; align-items: flex-start; gap: var(--space-sm); }
+      .map-panel__header .icon { width: 1.5rem; height: 1.5rem; color: var(--teal); }
+      .map-panel__header h3 { margin: 0; font-size: 1.125rem; }
+      .map-panel__header p { max-width: 65ch; margin: var(--space-2xs) 0 0; color: var(--ink-dim); }
+      .map-places { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--space-md); }
+      .place { padding: var(--space-lg); background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+      .place h4 { margin: 0; font-size: 1rem; }
+      .place p { margin: var(--space-xs) 0 0; color: var(--ink-dim); font-size: 0.9375rem; }
+
+      .notes-panel { display: grid; gap: var(--space-lg); }
+      .notes-panel__copy { max-width: 62ch; margin: 0; color: var(--ink-dim); }
+      .notes-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); flex-wrap: wrap; }
+      .save-state { color: var(--ink-faint); font-size: 0.875rem; }
+
+      details { padding: var(--space-md); background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+      details summary { color: var(--ink); font-weight: 700; }
+      details p { margin: var(--space-sm) 0 0; color: var(--ink-dim); }
+
+      .locked-row { display: flex; align-items: center; gap: var(--space-sm); margin-top: var(--space-lg); padding: var(--space-md); color: var(--teal); background: oklch(0.18 0.027 205); border: 1px solid var(--teal-deep); border-radius: var(--radius-sm); }
+      .locked-row .icon { color: var(--teal); }
+      .locked-row p { margin: 0; font-size: 0.9375rem; }
+
+      dialog {
+        width: min(calc(100% - 2rem), 34rem);
+        padding: 0;
+        color: var(--ink);
+        background: var(--surface-raised);
+        border: 1px solid oklch(0.43 0.025 210);
+        border-radius: var(--radius-md);
+      }
+      dialog::backdrop { background: oklch(0.03 0 0 / 0.8); }
+      .dialog__body { display: grid; gap: var(--space-lg); padding: var(--space-xl); }
+      .dialog__body p { margin: 0; color: var(--ink-dim); }
+      .dialog__actions { display: flex; justify-content: flex-end; gap: var(--space-sm); flex-wrap: wrap; }
+      .dialog__callout { padding: var(--space-md); color: var(--ink-dim); background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 0.9375rem; }
+      .quick-chapters { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
+      .chapter-chip { min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem; color: var(--ink-dim); background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+      .chapter-chip:hover, .chapter-chip[aria-pressed="true"] { color: var(--ink); border-color: var(--green); background: oklch(0.18 0.03 130); }
+
+      .toast {
+        position: fixed;
+        z-index: 15;
+        right: max(var(--space-md), env(safe-area-inset-right));
+        bottom: max(var(--space-md), env(safe-area-inset-bottom));
+        max-width: min(28rem, calc(100% - 2rem));
+        padding: var(--space-sm) var(--space-md);
+        color: var(--ink);
+        background: var(--surface-raised);
+        border: 1px solid var(--green-deep);
+        border-radius: var(--radius-sm);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(1rem);
+        transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+      }
+      .toast.is-visible { opacity: 1; transform: translateY(0); }
+
+      @media (max-width: 56rem) {
+        .app-shell { grid-template-columns: 1fr; border-inline: 0; }
+        .sidebar { position: static; min-width: 0; min-height: auto; padding: var(--space-md); border-right: 0; border-bottom: 1px solid var(--line); }
+        .brand { display: flex; align-items: baseline; gap: var(--space-sm); padding: var(--space-xs) var(--space-sm) var(--space-md); }
+        .brand__name { font-size: 1.125rem; }
+        .nav-list { display: flex; min-width: 0; overflow-x: auto; padding-bottom: var(--space-2xs); }
+        .nav-list li { flex: 0 0 auto; }
+        .nav-button { width: auto; white-space: nowrap; }
+        .sidebar__footer { display: none; }
+        .split-grid { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 40rem) {
+        .topbar { align-items: flex-start; min-height: auto; }
+        .status-pill { min-height: 2.375rem; font-size: 0.75rem; }
+        .main { padding: var(--space-lg) var(--space-md) calc(var(--space-xl) + env(safe-area-inset-bottom)); }
+        .view-header { display: block; padding-bottom: var(--space-lg); }
+        .view-header h2 { font-size: 1.5rem; }
+        .progress-panel { grid-template-columns: 1fr; gap: var(--space-lg); padding: var(--space-lg); }
+        .progress-panel .button { width: 100%; }
+        .search-wrap { grid-template-columns: 1fr; }
+        .list-item { grid-template-columns: auto minmax(0, 1fr); }
+        .list-item__meta { grid-column: 2; padding-top: 0; }
+        .map-places { grid-template-columns: 1fr; }
+        .dialog__body { padding: var(--space-lg); }
+      }
+
+      @media (pointer: coarse) {
+        .nav-button, .button, .chapter-chip { min-height: 3rem; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação do guia">
+        <a class="brand" href="#agora" data-view-link="agora" aria-label="Voltar para o ponto de leitura">
+          <span class="brand__name">NEUROMANCER</span>
+          <span class="brand__subtitle">guia de leitura</span>
+        </a>
+
+        <nav aria-label="Seções do guia">
+          <ul class="nav-list">
+            <li><button class="nav-button" type="button" data-view="agora" aria-current="page"><span class="icon" data-icon="book" aria-hidden="true"></span>Agora</button></li>
+            <li><button class="nav-button" type="button" data-view="personagens"><span class="icon" data-icon="person" aria-hidden="true"></span>Personagens</button></li>
+            <li><button class="nav-button" type="button" data-view="conceitos"><span class="icon" data-icon="spark" aria-hidden="true"></span>Conceitos</button></li>
+            <li><button class="nav-button" type="button" data-view="historia"><span class="icon" data-icon="route" aria-hidden="true"></span>História</button></li>
+            <li><button class="nav-button" type="button" data-view="mapa"><span class="icon" data-icon="map" aria-hidden="true"></span>Mapa</button></li>
+            <li><button class="nav-button" type="button" data-view="notas"><span class="icon" data-icon="note" aria-hidden="true"></span>Notas</button></li>
+          </ul>
+        </nav>
+
+        <div class="sidebar__footer">
+          <div class="protection-state"><span class="state-dot" aria-hidden="true"></span><span>Proteção ativa</span></div>
+          <p>O guia só apresenta material cadastrado como seguro até o capítulo que você marcar.</p>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div class="topbar__context">
+            <p>Guia sem spoilers</p>
+            <h1 id="topbar-title">Ponto de leitura</h1>
+          </div>
+          <button class="status-pill" type="button" id="open-progress" aria-haspopup="dialog">
+            <span class="state-dot" aria-hidden="true"></span>
+            <span id="status-label">Ainda não marcado</span>
+          </button>
+        </header>
+
+        <main class="main" id="main-content" tabindex="-1"></main>
+      </div>
+    </div>
+
+    <dialog id="progress-dialog" aria-labelledby="progress-dialog-title">
+      <form class="dialog__body" id="progress-form">
+        <div>
+          <p class="eyebrow">Proteção narrativa</p>
+          <h2 class="dialog__title" id="progress-dialog-title">Onde você está na leitura?</h2>
+        </div>
+        <p>Marque apenas o último capítulo que você concluiu. O guia filtra cada verbete pelo seu ponto de leitura.</p>
+        <div class="field">
+          <label for="chapter-input">Último capítulo concluído</label>
+          <input class="number-input" id="chapter-input" name="chapter" type="number" min="0" max="24" inputmode="numeric" required aria-describedby="chapter-help">
+          <span id="chapter-help" class="section__hint">Use 0 se ainda não começou. O número não revela nenhum acontecimento.</span>
+        </div>
+        <div>
+          <p class="eyebrow" style="margin:0 0 0.5rem">Acesso rápido</p>
+          <div class="quick-chapters" aria-label="Capítulos de acesso rápido">
+            <button class="chapter-chip" type="button" data-chapter="0">0</button>
+            <button class="chapter-chip" type="button" data-chapter="1">1</button>
+            <button class="chapter-chip" type="button" data-chapter="2">2</button>
+            <button class="chapter-chip" type="button" data-chapter="3">3</button>
+            <button class="chapter-chip" type="button" data-chapter="4">4</button>
+            <button class="chapter-chip" type="button" data-chapter="5">5</button>
+          </div>
+        </div>
+        <div class="dialog__callout">Nunca exibimos títulos, nomes ou resumos de material ainda bloqueado.</div>
+        <div class="dialog__actions">
+          <button class="button button--quiet" type="button" data-close-dialog="progress-dialog">Cancelar</button>
+          <button class="button button--primary" type="submit">Atualizar proteção</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="advance-dialog" aria-labelledby="advance-dialog-title">
+      <form class="dialog__body" method="dialog" id="advance-form">
+        <div>
+          <p class="eyebrow">Confirmação necessária</p>
+          <h2 class="dialog__title" id="advance-dialog-title">Liberar material seguro?</h2>
+        </div>
+        <p id="advance-copy"></p>
+        <div class="dialog__callout">Você poderá voltar a um capítulo anterior quando quiser. Este guia não mostra uma prévia do que será liberado.</div>
+        <div class="dialog__actions">
+          <button class="button button--quiet" value="cancel">Manter como está</button>
+          <button class="button button--primary" value="confirm">Confirmar capítulo</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="reset-dialog" aria-labelledby="reset-dialog-title">
+      <form class="dialog__body" method="dialog" id="reset-form">
+        <div>
+          <p class="eyebrow">Redefinir leitura</p>
+          <h2 class="dialog__title" id="reset-dialog-title">Voltar ao início?</h2>
+        </div>
+        <p>O guia voltará a não mostrar nenhum verbete. Suas notas pessoais permanecem neste navegador.</p>
+        <div class="dialog__actions">
+          <button class="button button--quiet" value="cancel">Manter capítulo</button>
+          <button class="button button--danger" value="confirm">Redefinir proteção</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (() => {
+        'use strict';
+
+        const STORAGE = {
+          progress: 'neuromancer-guide-progress-v1',
+          notes: 'neuromancer-guide-notes-v1'
+        };
+        const MAX_CHAPTER = 24;
+
+        const icons = {
+          book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5z"/></svg>',
+          person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.5"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg>',
+          spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7z"/></svg>',
+          route: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M7.6 6.2c1.4 1.2 1 3.2-.6 4.1l-1.8 1c-1.9 1.1-1.2 4 1 4h5.2c2.2 0 2.9 2.8 1 4"/></svg>',
+          map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3z"/><path d="M9 3v15M15 6v15"/></svg>',
+          note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>',
+          lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>',
+          unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.2-2.4M12 14v3"/></svg>',
+          search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>',
+          arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+          info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+          check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>'
+        };
+
+        const library = {
+          personagens: [
+            { chapter: 1, title: 'Case', description: 'A figura central apresentada no início. Sua habilidade está ligada à matriz, e uma perda anterior molda o estado em que ele começa a história.', keywords: 'case matriz começo habilidade perda' },
+            { chapter: 1, title: 'Molly', description: 'Uma profissional de segurança que cruza o caminho de Case logo no começo. Este guia só a descreve a partir do que já foi apresentado.', keywords: 'molly segurança começo case' },
+            { chapter: 1, title: 'Armitage', description: 'Um intermediário de presença calculada que se aproxima de Case no início da leitura.', keywords: 'armitage intermediário case início' }
+          ],
+          conceitos: [
+            { chapter: 1, title: 'Matriz', description: 'Um ambiente consensual de informação, acessado por meio de tecnologia. Pense nele como uma experiência espacial para dados e sistemas.', keywords: 'matriz cyberspace dados informação tecnologia' },
+            { chapter: 1, title: 'Cowboy de console', description: 'Pessoa especializada em navegar sistemas por meio da matriz. É uma ocupação com vocabulário e riscos próprios nesse universo.', keywords: 'cowboy console matriz ocupação' },
+            { chapter: 1, title: 'ICE', description: 'Uma barreira de segurança ligada aos sistemas da matriz. O termo descreve proteção, não um lugar.', keywords: 'ice segurança barreira sistemas matriz' },
+            { chapter: 1, title: 'Chiba City', description: 'A cidade onde a leitura começa: uma paisagem urbana marcada por comércio, tecnologia e sobrevivência cotidiana.', keywords: 'chiba city cidade começo urbano tecnologia' }
+          ],
+          historia: [
+            { chapter: 1, title: 'O ponto de partida', description: 'A história se abre em Chiba City, acompanhando Case num momento de instabilidade. O guia para aqui para preservar as descobertas que vêm depois.', keywords: 'chiba case início ponto partida' }
+          ],
+          mapa: [
+            { chapter: 1, title: 'Chiba City', description: 'Espaço físico do início da leitura: uma cidade em que tecnologia e vida cotidiana estão profundamente misturadas.', keywords: 'chiba city cidade físico' },
+            { chapter: 1, title: 'A matriz', description: 'Um espaço de informação, não um lugar físico. Ela organiza como certas pessoas percebem e atravessam sistemas.', keywords: 'matriz informação espaço sistemas' }
+          ]
+        };
+
+        const titles = {
+          agora: ['Ponto de leitura', 'Defina o capítulo que concluiu e consulte apenas o que é seguro para esse ponto.'],
+          personagens: ['Personagens', 'Quem já apareceu, descrito somente até o seu marco de leitura.'],
+          conceitos: ['Conceitos', 'Termos e ideias explicados sem antecipar como eles ganham importância.'],
+          historia: ['História', 'Uma linha de contexto curta, limitada ao que você já terminou.'],
+          mapa: ['Mapa de contexto', 'Lugares e espaços conceituais que já podem ser nomeados com segurança.'],
+          notas: ['Notas pessoais', 'Registre suas próprias impressões. Elas ficam salvas apenas neste navegador.']
+        };
+
+        const main = document.querySelector('#main-content');
+        const topbarTitle = document.querySelector('#topbar-title');
+        const statusLabel = document.querySelector('#status-label');
+        const progressDialog = document.querySelector('#progress-dialog');
+        const advanceDialog = document.querySelector('#advance-dialog');
+        const resetDialog = document.querySelector('#reset-dialog');
+        const chapterInput = document.querySelector('#chapter-input');
+        const advanceCopy = document.querySelector('#advance-copy');
+        const toast = document.querySelector('#toast');
+
+        let view = 'agora';
+        let pendingChapter = null;
+        let toastTimer = null;
+        let progress = readProgress();
+
+        function readProgress() {
+          const stored = Number.parseInt(localStorage.getItem(STORAGE.progress), 10);
+          return Number.isFinite(stored) ? Math.max(0, Math.min(MAX_CHAPTER, stored)) : 0;
+        }
+
+        function saveProgress(value) {
+          progress = Math.max(0, Math.min(MAX_CHAPTER, value));
+          localStorage.setItem(STORAGE.progress, String(progress));
+          render();
+        }
+
+        function getChapterLabel(value = progress) {
+          return value === 0 ? 'Ainda não marcado' : `Capítulo ${value} concluído`;
+        }
+
+        function showToast(message) {
+          toast.textContent = message;
+          toast.classList.add('is-visible');
+          window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 3500);
+        }
+
+        function icon(name) { return `<span class="icon" data-icon="${name}" aria-hidden="true">${icons[name]}</span>`; }
+
+        function renderIcons() {
+          document.querySelectorAll('[data-icon]').forEach((element) => {
+            const name = element.dataset.icon;
+            if (icons[name]) element.innerHTML = icons[name];
+          });
+        }
+
+        function filteredItems(group, query = '') {
+          const normalized = query.trim().toLocaleLowerCase('pt-BR');
+          return library[group].filter((item) => item.chapter <= progress && (!normalized || `${item.title} ${item.description} ${item.keywords}`.toLocaleLowerCase('pt-BR').includes(normalized)));
+        }
+
+        function currentSafeCount() {
+          return Object.values(library).flat().filter((item) => item.chapter <= progress).length;
+        }
+
+        function lockedMessage(kind) {
+          const names = { personagens: 'personagens', conceitos: 'conceitos', historia: 'contexto da história', mapa: 'locais e espaços' };
+          return `<div class="empty-state">${icon('lock')}<h3>Proteção em espera</h3><p>Marque o primeiro capítulo que concluiu para consultar ${names[kind]}. O guia não lista o que ainda está bloqueado.</p><button class="button button--primary" type="button" data-open-progress>Marcar capítulo concluído</button></div>`;
+        }
+
+        function noResultMessage() {
+          return `<div class="empty-state">${icon('search')}<h3>Nada seguro corresponde à busca</h3><p>Tente outro termo. A busca não vasculha conteúdo que esteja além do seu ponto de leitura.</p></div>`;
+        }
+
+        function listMarkup(items, label) {
+          if (!items.length) return noResultMessage();
+          return `<ul class="list" aria-label="${label}">${items.map((item) => `
+            <li class="list-item">
+              <span class="list-item__glyph">${icon(label === 'Personagens' ? 'person' : label === 'Conceitos' ? 'spark' : label === 'História' ? 'route' : 'map')}</span>
+              <div class="list-item__body"><h3 class="list-item__title">${item.title}</h3><p class="list-item__description">${item.description}</p></div>
+              <span class="list-item__meta">Cap. ${item.chapter}</span>
+            </li>`).join('')}</ul>`;
+        }
+
+        function viewHeader(title, description) {
+          return `<header class="view-header"><div><p class="eyebrow">Guia sem spoilers</p><h2>${title}</h2><p>${description}</p></div></header>`;
+        }
+
+        function renderAgora() {
+          if (progress === 0) {
+            return `${viewHeader(...titles.agora)}
+              <section class="section"><div class="progress-panel"><div class="progress-panel__body"><span class="progress-panel__chapter">PRIMEIRO PASSO</span><h3>Seu ponto de leitura ainda não foi marcado.</h3><p>Quando terminar o primeiro capítulo, informe o número aqui. Até lá, o guia guarda todos os verbetes fora de vista.</p></div><button class="button button--primary" type="button" data-open-progress>${icon('book')}Marcar capítulo</button></div></section>
+              <section class="section"><div class="split-grid"><div class="reading-note"><p class="eyebrow">Como usar</p><p class="reading-note__lead">Leia primeiro. Consulte depois.</p><p class="reading-note__copy">A cada consulta, o guia se limita ao ponto que você liberou. Não há prévias, títulos futuros, contagens ocultas ou dicas sobre o que vem a seguir.</p></div><aside class="protection-panel"><div class="protection-lock">${icon('lock')} <span>Proteção ligada</span></div><p>O filtro funciona antes da busca e antes de cada lista. Seu ritmo define o que aparece.</p></aside></div></section>`;
+          }
+
+          const characters = filteredItems('personagens').slice(0, 2);
+          const concepts = filteredItems('conceitos').slice(0, 2);
+          return `${viewHeader(...titles.agora)}
+            <section class="section"><div class="progress-panel"><div class="progress-panel__body"><span class="progress-panel__chapter">${getChapterLabel()}</span><h3>Você está lendo com proteção ativa.</h3><p>${currentSafeCount()} verbetes seguros estão disponíveis neste ponto. Nada de capítulos posteriores é exibido ou pesquisável.</p></div><button class="button button--primary" type="button" data-open-progress>Alterar capítulo</button></div></section>
+            <section class="section"><div class="split-grid"><div class="reading-note"><p class="eyebrow">Seu ponto de leitura</p><p class="reading-note__lead">Consulte sem transformar a leitura em um spoiler acidental.</p><p class="reading-note__copy">Os verbetes abaixo são limitados ao material já mostrado. Use as seções para aprofundar apenas quando quiser.</p><div class="quiet-divider"></div><div class="section__header"><h3 class="section-title">Disponível agora</h3><button class="button button--quiet" type="button" data-view="personagens">Ver tudo</button></div>${listMarkup([...characters, ...concepts], 'Conceitos')}</div><aside class="protection-panel"><div class="protection-lock">${icon('unlock')} <span>Filtro em vigor</span></div><p>Você marcou <strong>capítulo ${progress}</strong>. Troque esse ponto a qualquer momento; reduzir o capítulo restringe o guia imediatamente.</p><details><summary>Por que o bloqueio é tão rígido?</summary><p>Mesmo o nome de um personagem ou de uma relação pode mudar sua expectativa. Por isso, o material futuro não recebe prévia.</p></details><button class="button button--quiet button--danger" type="button" data-open-reset>Redefinir leitura</button></aside></div></section>`;
+        }
+
+        function renderLibraryView(group) {
+          const [title, description] = titles[group];
+          if (progress === 0) return `${viewHeader(title, description)}<section class="section">${lockedMessage(group)}</section>`;
+          return `${viewHeader(title, description)}
+            <section class="section"><div class="search-wrap"><div class="field"><label for="library-search">Buscar apenas no material liberado</label><input class="input" id="library-search" type="search" autocomplete="off" placeholder="Digite um termo que já apareceu na leitura"></div><button class="button button--quiet" type="button" id="clear-search">Limpar busca</button></div></section>
+            <section class="section" aria-live="polite"><p class="section__hint" id="result-count"></p><div id="library-results"></div><div class="locked-row">${icon('lock')}<p>Qualquer material além do seu ponto de leitura permanece sem título e sem prévia.</p></div></section>`;
+        }
+
+        function renderHistory() {
+          const [title, description] = titles.historia;
+          if (progress === 0) return `${viewHeader(title, description)}<section class="section">${lockedMessage('historia')}</section>`;
+          const items = filteredItems('historia');
+          return `${viewHeader(title, description)}<section class="section"><ol class="timeline">${items.map((item) => `<li class="timeline__item"><span class="timeline__marker">${item.chapter}</span><div><h3>${item.title}</h3><p>${item.description}</p></div></li>`).join('')}</ol><div class="locked-row">${icon('lock')}<p>O próximo trecho não recebe nome, indicação nem resumo antes de você avançar.</p></div></section>`;
+        }
+
+        function renderMap() {
+          const [title, description] = titles.mapa;
+          if (progress === 0) return `${viewHeader(title, description)}<section class="section">${lockedMessage('mapa')}</section>`;
+          const places = filteredItems('mapa');
+          return `${viewHeader(title, description)}<section class="section"><div class="map-panel"><div class="map-panel__header">${icon('map')}<div><h3>Referências de espaço</h3><p>Este não é um mapa que antecipa destinos. É um vocabulário de lugares e camadas que já podem ser mencionados.</p></div></div><div class="map-places">${places.map((item) => `<article class="place"><h4>${item.title}</h4><p>${item.description}</p></article>`).join('')}</div></div><div class="locked-row">${icon('lock')}<p>Outros locais só entram no mapa quando forem seguros para o capítulo marcado.</p></div></section>`;
+        }
+
+        function renderNotes() {
+          return `${viewHeader(...titles.notas)}<section class="section"><div class="notes-panel"><p class="notes-panel__copy">Este espaço é seu: registre hipóteses, estranhamentos e perguntas. O texto não é enviado para lugar nenhum e não aparece em outras seções.</p><div class="field"><label for="notes">Suas notas</label><textarea class="textarea" id="notes" placeholder="O que chamou sua atenção até aqui?"></textarea></div><div class="notes-actions"><span class="save-state" id="save-state">As notas são salvas neste navegador.</span><button class="button button--primary" type="button" id="save-notes">Salvar notas</button></div></div></section>`;
+        }
+
+        function attachViewInteractions() {
+          document.querySelectorAll('[data-open-progress]').forEach((button) => button.addEventListener('click', openProgressDialog));
+          document.querySelectorAll('[data-open-reset]').forEach((button) => button.addEventListener('click', () => resetDialog.showModal()));
+          document.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.view)));
+
+          const search = document.querySelector('#library-search');
+          if (search) {
+            const group = view;
+            const results = document.querySelector('#library-results');
+            const resultCount = document.querySelector('#result-count');
+            const updateResults = () => {
+              const items = filteredItems(group, search.value);
+              resultCount.textContent = items.length === 1 ? '1 verbete seguro encontrado.' : `${items.length} verbetes seguros encontrados.`;
+              results.innerHTML = listMarkup(items, titles[group][0]);
+              renderIcons();
+            };
+            search.addEventListener('input', updateResults);
+            document.querySelector('#clear-search').addEventListener('click', () => { search.value = ''; search.focus(); updateResults(); });
+            updateResults();
+          }
+
+          const notes = document.querySelector('#notes');
+          if (notes) {
+            notes.value = localStorage.getItem(STORAGE.notes) || '';
+            const save = () => {
+              localStorage.setItem(STORAGE.notes, notes.value);
+              document.querySelector('#save-state').textContent = 'Notas salvas neste navegador.';
+              showToast('Notas salvas neste navegador.');
+            };
+            notes.addEventListener('input', () => { document.querySelector('#save-state').textContent = 'Alterações ainda não salvas.'; });
+            document.querySelector('#save-notes').addEventListener('click', save);
+          }
+        }
+
+        function render() {
+          const [title] = titles[view];
+          topbarTitle.textContent = title;
+          statusLabel.textContent = getChapterLabel();
+          document.querySelectorAll('.nav-button').forEach((button) => {
+            const active = button.dataset.view === view;
+            if (active) button.setAttribute('aria-current', 'page');
+            else button.removeAttribute('aria-current');
+          });
+          const views = { agora: renderAgora, personagens: () => renderLibraryView('personagens'), conceitos: () => renderLibraryView('conceitos'), historia: renderHistory, mapa: renderMap, notas: renderNotes };
+          main.innerHTML = views[view]();
+          renderIcons();
+          attachViewInteractions();
+        }
+
+        function setView(nextView) {
+          if (!titles[nextView]) return;
+          view = nextView;
+          history.replaceState(null, '', `#${nextView}`);
+          render();
+          main.focus({ preventScroll: true });
+        }
+
+        function openProgressDialog() {
+          chapterInput.value = progress;
+          syncQuickChapterButtons();
+          progressDialog.showModal();
+          chapterInput.focus();
+        }
+
+        function syncQuickChapterButtons() {
+          const value = Number(chapterInput.value);
+          document.querySelectorAll('.chapter-chip').forEach((chip) => chip.setAttribute('aria-pressed', String(Number(chip.dataset.chapter) === value)));
+        }
+
+        document.querySelector('#open-progress').addEventListener('click', openProgressDialog);
+        document.querySelectorAll('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => document.querySelector(`#${button.dataset.closeDialog}`).close()));
+        document.querySelectorAll('.chapter-chip').forEach((chip) => chip.addEventListener('click', () => { chapterInput.value = chip.dataset.chapter; syncQuickChapterButtons(); }));
+        chapterInput.addEventListener('input', syncQuickChapterButtons);
+
+        document.querySelector('#progress-form').addEventListener('submit', (event) => {
+          event.preventDefault();
+          const next = Number.parseInt(chapterInput.value, 10);
+          if (!Number.isInteger(next) || next < 0 || next > MAX_CHAPTER) {
+            chapterInput.setCustomValidity(`Use um número entre 0 e ${MAX_CHAPTER}.`);
+            chapterInput.reportValidity();
+            return;
+          }
+          chapterInput.setCustomValidity('');
+          progressDialog.close();
+          if (next > progress) {
+            pendingChapter = next;
+            advanceCopy.textContent = `Você confirmou que terminou o capítulo ${next}. O guia passará a mostrar somente verbetes cadastrados como seguros até esse ponto.`;
+            advanceDialog.showModal();
+          } else {
+            saveProgress(next);
+            showToast(next === 0 ? 'Proteção redefinida. Nenhum verbete está visível.' : `Proteção ajustada para o capítulo ${next}.`);
+          }
+        });
+
+        advanceDialog.addEventListener('close', () => {
+          if (advanceDialog.returnValue === 'confirm' && pendingChapter !== null) {
+            saveProgress(pendingChapter);
+            showToast(`Capítulo ${pendingChapter} confirmado. Proteção atualizada.`);
+          }
+          pendingChapter = null;
+        });
+
+        resetDialog.addEventListener('close', () => {
+          if (resetDialog.returnValue === 'confirm') {
+            saveProgress(0);
+            showToast('Proteção redefinida. Suas notas foram preservadas.');
+          }
+        });
+
+        document.querySelectorAll('[data-view-link]').forEach((link) => link.addEventListener('click', (event) => { event.preventDefault(); setView(link.dataset.viewLink); }));
+        document.querySelectorAll('.nav-button').forEach((button) => button.addEventListener('click', () => setView(button.dataset.view)));
+
+        const initialView = window.location.hash.slice(1);
+        if (titles[initialView]) view = initialView;
+        render();
+      })();
+    </script>
+  </body>
+</html>
