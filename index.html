@@ -382,6 +382,14 @@
       .notes-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); flex-wrap: wrap; }
       .save-state { color: var(--ink-faint); font-size: 0.875rem; }
 
+      .question-panel { display: grid; gap: var(--space-lg); }
+      .question-result { display: grid; gap: var(--space-md); padding: var(--space-lg); background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+      .question-result[hidden] { display: none; }
+      .question-result__title { display: flex; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; }
+      .question-result__title .icon { color: var(--green); }
+      .question-result__copy { max-width: 64ch; margin: 0; color: var(--ink-dim); }
+      .question-template { min-height: 7.5rem; }
+
       details { padding: var(--space-md); background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius-sm); }
       details summary { color: var(--ink); font-weight: 700; }
       details p { margin: var(--space-sm) 0 0; color: var(--ink-dim); }
@@ -477,6 +485,7 @@
             <li><button class="nav-button" type="button" data-view="conceitos"><span class="icon" data-icon="spark" aria-hidden="true"></span>Conceitos</button></li>
             <li><button class="nav-button" type="button" data-view="historia"><span class="icon" data-icon="route" aria-hidden="true"></span>História</button></li>
             <li><button class="nav-button" type="button" data-view="mapa"><span class="icon" data-icon="map" aria-hidden="true"></span>Mapa</button></li>
+            <li><button class="nav-button" type="button" data-view="duvidas"><span class="icon" data-icon="info" aria-hidden="true"></span>Dúvidas</button></li>
             <li><button class="nav-button" type="button" data-view="notas"><span class="icon" data-icon="note" aria-hidden="true"></span>Notas</button></li>
           </ul>
         </nav>
@@ -617,6 +626,7 @@
           conceitos: ['Conceitos', 'Termos e ideias explicados sem antecipar como eles ganham importância.'],
           historia: ['História', 'Uma linha de contexto curta, limitada ao que você já terminou.'],
           mapa: ['Mapa de contexto', 'Lugares e espaços conceituais que já podem ser nomeados com segurança.'],
+          duvidas: ['Pergunte sem spoilers', 'Consulte termos já liberados ou prepare uma pergunta segura para enviar aqui no chat.'],
           notas: ['Notas pessoais', 'Registre suas próprias impressões. Elas ficam salvas apenas neste navegador.']
         };
 
@@ -669,6 +679,22 @@
         function filteredItems(group, query = '') {
           const normalized = query.trim().toLocaleLowerCase('pt-BR');
           return library[group].filter((item) => item.chapter <= progress && (!normalized || `${item.title} ${item.description} ${item.keywords}`.toLocaleLowerCase('pt-BR').includes(normalized)));
+        }
+
+        function findQuestionMatches(query) {
+          const ignoredWords = new Set(['a', 'aqui', 'ao', 'as', 'ate', 'com', 'como', 'da', 'das', 'de', 'do', 'dos', 'e', 'em', 'esta', 'este', 'eu', 'me', 'minha', 'no', 'nos', 'o', 'os', 'para', 'por', 'quem', 'que', 'se', 'sem', 'sobre', 'um', 'uma', 'vai']);
+          const terms = query
+            .toLocaleLowerCase('pt-BR')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .split(/[^\p{L}\p{N}]+/u)
+            .filter((term) => term.length > 1 && !ignoredWords.has(term));
+          return Object.entries(library)
+            .flatMap(([group, items]) => items.map((item) => ({ ...item, group })))
+            .filter((item) => {
+              const haystack = `${item.title} ${item.description} ${item.keywords}`.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+              return item.chapter <= progress && terms.some((term) => haystack.includes(term));
+            });
         }
 
         function currentSafeCount() {
@@ -738,6 +764,11 @@
           return `${viewHeader(...titles.notas)}<section class="section"><div class="notes-panel"><p class="notes-panel__copy">Este espaço é seu: registre hipóteses, estranhamentos e perguntas. O texto não é enviado para lugar nenhum e não aparece em outras seções.</p><div class="field"><label for="notes">Suas notas</label><textarea class="textarea" id="notes" placeholder="O que chamou sua atenção até aqui?"></textarea></div><div class="notes-actions"><span class="save-state" id="save-state">As notas são salvas neste navegador.</span><button class="button button--primary" type="button" id="save-notes">Salvar notas</button></div></div></section>`;
         }
 
+        function renderQuestions() {
+          if (progress === 0) return `${viewHeader(...titles.duvidas)}<section class="section"><div class="empty-state">${icon('lock')}<h3>Proteção em espera</h3><p>Marque o primeiro capítulo que concluiu antes de fazer uma pergunta. Assim a resposta pode respeitar seu ponto de leitura.</p><button class="button button--primary" type="button" data-open-progress>Marcar capítulo concluído</button></div></section>`;
+          return `${viewHeader(...titles.duvidas)}<section class="section"><form class="question-panel" id="question-form"><p class="notes-panel__copy">Escreva a dúvida do jeito que ela surgiu. O guia procura somente nos verbetes já liberados; se não houver resposta local, ele prepara uma pergunta com seu capítulo para você trazer ao chat.</p><div class="field"><label for="question">Qual é a sua dúvida?</label><textarea class="textarea question-template" id="question" required placeholder="Ex.: O que é ICE? Ou: quem é Molly até aqui?"></textarea></div><div class="notes-actions"><span class="save-state" id="question-state">Seu capítulo atual será incluído na pergunta.</span><button class="button button--primary" type="submit">Buscar explicação segura</button></div></form><div class="question-result" id="question-result" hidden aria-live="polite"></div></section>`;
+        }
+
         function attachViewInteractions() {
           document.querySelectorAll('[data-open-progress]').forEach((button) => button.addEventListener('click', openProgressDialog));
           document.querySelectorAll('[data-open-reset]').forEach((button) => button.addEventListener('click', () => resetDialog.showModal()));
@@ -770,6 +801,42 @@
             notes.addEventListener('input', () => { document.querySelector('#save-state').textContent = 'Alterações ainda não salvas.'; });
             document.querySelector('#save-notes').addEventListener('click', save);
           }
+
+          const questionForm = document.querySelector('#question-form');
+          if (questionForm) {
+            const question = document.querySelector('#question');
+            const result = document.querySelector('#question-result');
+            questionForm.addEventListener('submit', (event) => {
+              event.preventDefault();
+              const query = question.value.trim();
+              if (!query) {
+                question.setCustomValidity('Escreva sua dúvida antes de buscar.');
+                question.reportValidity();
+                return;
+              }
+              question.setCustomValidity('');
+              const matches = findQuestionMatches(query);
+              result.hidden = false;
+              if (matches.length) {
+                result.innerHTML = `<h3 class="question-result__title">${icon('check')}Encontrei material seguro para esta dúvida</h3><p class="question-result__copy">Estas explicações pertencem somente ao capítulo ${progress} ou a um ponto anterior.</p>${listMarkup(matches, 'Conceitos')}`;
+              } else {
+                result.innerHTML = `<h3 class="question-result__title">${icon('info')}Pergunta pronta para o chat</h3><p class="question-result__copy">Esta dúvida não corresponde a um verbete local já liberado. Copie o texto abaixo e envie aqui; assim a resposta também respeitará o seu ponto de leitura.</p><div class="field"><label for="question-template">Pergunta segura</label><textarea class="textarea question-template" id="question-template" readonly></textarea></div><div class="notes-actions"><span class="save-state">Nada da sua pergunta é enviado pelo guia.</span><button class="button button--primary" type="button" id="copy-question">Copiar pergunta segura</button></div>`;
+                const template = document.querySelector('#question-template');
+                template.value = `Estou no capítulo ${progress} de Neuromancer. Sem spoilers além desse ponto: ${query}`;
+                document.querySelector('#copy-question').addEventListener('click', async () => {
+                  try {
+                    await navigator.clipboard.writeText(template.value);
+                    showToast('Pergunta segura copiada. Cole-a aqui no chat.');
+                  } catch {
+                    template.focus();
+                    template.select();
+                    showToast('Selecione e copie a pergunta para enviar aqui no chat.');
+                  }
+                });
+              }
+              renderIcons();
+            });
+          }
         }
 
         function render() {
@@ -781,7 +848,7 @@
             if (active) button.setAttribute('aria-current', 'page');
             else button.removeAttribute('aria-current');
           });
-          const views = { agora: renderAgora, personagens: () => renderLibraryView('personagens'), conceitos: () => renderLibraryView('conceitos'), historia: renderHistory, mapa: renderMap, notas: renderNotes };
+          const views = { agora: renderAgora, personagens: () => renderLibraryView('personagens'), conceitos: () => renderLibraryView('conceitos'), historia: renderHistory, mapa: renderMap, duvidas: renderQuestions, notas: renderNotes };
           main.innerHTML = views[view]();
           renderIcons();
           attachViewInteractions();
